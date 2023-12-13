@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="style.css">
+    <title>Customer Details</title>
+    <script src="logout.js"></script>
+</head>
+<body>
+    <header class="header">
+        <h1>Customer Details</h1>
+        <button class="logout-button" onclick="logout()">Logout</button>
+        <button class="addcustomer-button" onclick="window.location.href='addcustomer.html'">Add Customer</button>
+    </header>
+    
+    <div class="customer-container">
+        <div class="customer-details-container">
+            <div class="customer-details">
+            </div>
+        </div>
+    </div>
+
+    <footer class="footer">
+        <p>&copy; 2023 </p>
+    </footer>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            fetchAndDisplayCustomerDetails();
+        });
+        async function fetchAndDisplayCustomerDetails() {
+            try {
+                const response = await fetch('http://localhost:3000/api/customerdetails', {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }                });
+
+                console.log(response);
+
+                if (response.status === 200) {
+                    const customerList = await response.json();
+                    console.log(customerList);
+                    displayCustomerDetails(customerList);
+                } else {
+                    console.error('Failed to fetch customer details:', response.status);
+                }
+            } catch (error) {
+                console.error('Error during fetching customer details:', error);
+            }
+        }
+
+function displayCustomerDetails(customerList) {
+            const detailsContainer = document.querySelector('.customer-details');
+            
+            const table = document.createElement('table');
+            const headerRow = table.insertRow();
+            const headers = ['First Name','Last Name', 'Address','Street','City','State', 'Email', 'Phone', 'Actions']; // Added 'Actions' header
+            headers.forEach(headerText => {
+                const header = document.createElement('th');
+                header.textContent = headerText;
+                headerRow.appendChild(header);
+            });
+
+            customerList.forEach(customer => {
+                const row = table.insertRow();
+
+                const first_name = row.insertCell(0);
+                first_name.textContent = `${customer.first_name}`;
+
+                const last_name = row.insertCell(1);
+                last_name.textContent = `${customer.last_name}`;
+
+                const street = row.insertCell(2);
+                street.textContent = `${customer.street}`;
+                
+                const address = row.insertCell(3);
+                address.textContent = `${customer.address}`;
+
+                const city = row.insertCell(4);
+                city.textContent = `${customer.city}`;
+
+                const state = row.insertCell(5);
+                state.textContent = `${customer.state}`;
+
+                const emailCell = row.insertCell(6);
+                emailCell.textContent = customer.email;
+
+                const phoneCell = row.insertCell(7);
+                phoneCell.textContent = customer.phone;
+
+                const actionsCell = row.insertCell(8);
+                const deleteButton = document.createElement('button');
+                deleteButton.textContent = 'Delete';
+                deleteButton.classList.add('delete-button'); 
+                deleteButton.addEventListener('click', () => deleteCustomer(customer.uuid));
+                actionsCell.appendChild(deleteButton);
+
+                const editButton = document.createElement('button');
+                editButton.textContent = 'Edit';
+                editButton.classList.add('edit-button');
+                editButton.addEventListener('click', () => editCustomer(customer.uuid));
+                actionsCell.appendChild(editButton);
+            });
+
+            detailsContainer.innerHTML = '';
+            detailsContainer.appendChild(table);
+
+            async function deleteCustomer(uuid) {
+                console.log(uuid)
+            try {
+                const response = await fetch(`http://localhost:3000/api/deletecustomer`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ uuid }),
+
+                });
+
+                if (response.status === 200) {
+                    alert("Customer Deleted Successfully")
+                    console.log('Customer deleted successfully');
+                    fetchAndDisplayCustomerDetails();
+                } else {
+                    console.error('Failed to delete customer:', response.status);
+                }
+            } catch (error) {
+                console.error('Error during deleting customer:', error);
+            }
+        }
+
+        function editCustomer(uuid) {
+            window.location.href = `addcustomer.html?uuid=${uuid}`
+            console.log(`Edit customer with ID: ${customerId}`);
+        }
+        }
+    </script>
+</body>
+</html>

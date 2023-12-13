@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="style.css">
+    <title>Login Page</title>
+</head>
+<body>
+    <header class="header">
+        <h1>Login Page</h1>
+    </header>
+    
+    <div class="main-container">
+        <div class="login-container">
+            <h2>Login</h2>
+            <form class="login-form" action="/customerlist.html" method="post">
+                <div class="form-group">
+                    <label for="username">Username:</label>
+                    <input type="text" id="username" name="username" required>
+                </div>
+                <div class="form-group">
+                    <label for="password">Password:</label>
+                    <input type="password" id="password" name="password" required>
+                </div>
+                <button type="button" class="login-button" onclick="authenticate()">Login</button>
+            </form>
+        </div>
+    </div>
+
+    <footer class="footer">
+        <p>&copy; 2023 </p>
+    </footer>
+
+    <script>
+        async function authenticate() {
+            const login_id = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+
+            try {
+                const response = await fetch('http://localhost:3000/api/login', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ login_id, password }),
+                });
+
+                console.log(login_id, password);
+                console.log(response);
+
+                if (response.status === 200) {
+                    const data = await response.json();
+                    const token = data.access_token;
+
+                    console.log('Authentication successful. Token:', token);
+
+
+                    window.location.href = 'customerlist.html';
+                } else {
+                    console.error('Authentication failed:', response.status);
+                }
+
+            } catch (error) {
+                console.error('Error during authentication:', error);
+            }
+        }
+    </script>
+</body>
+</html>
